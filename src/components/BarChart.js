@@ -17,26 +17,71 @@ export class BarChart extends Component {
     {
         let y_domain = 500;
         let radius = 1.5;
-        // if (this.state.year == 2021 && this.timerID === null) {
-        //     y_domain = 150;
-        //     radius = 3;
-        // }
+        if (this.state.year == 2021 && this.timerID === null) {
+            y_domain = 100;
+            radius = 3;
+        }
 
-        let datafiltered = this.median_childmortality.filter(
-            x => x.year <= this.state.year
+        const year_income = this.incomedata.map(
+            (x) => {                 
+                let cm_country = this.cm_data.find(y => y.country === x.country);
+                if (cm_country === undefined) {
+                    return null;
+                }
+                if (isNaN(x[this.state.year]) || isNaN(cm_country[this.state.year]))
+                {
+                    return null;
+                }
+                return {'country': x.country, 'income': x[this.state.year], 'child_mortality': cm_country[[this.state.year]]} 
+            }
+        ).filter(
+            x => {
+                if (x.child_mortality > 0) return true;
+                return false;
+            }
         )
 
-        let datafiltered2 = this.median_income.filter(
-            x => x.year <= this.state.year
-        )
+        const year_income_sorted = year_income.sort((a, b) => parseFloat(a.income) - parseFloat(b.income))
+        const num_countries = year_income_sorted.length
+        const num_groups = 10
+        const num_countries_per_group = Math.floor(num_countries / num_groups)
 
-        const scalex = d3.scaleLinear()
-        .domain([1800,2040])
+        let groups = {}
+        for (let index = 0; index < num_groups; index++) {
+            groups[index] = []            
+        }
+
+        for (let index = 0; index < num_countries; index++) {
+            let group_index = Math.floor(index / num_countries_per_group)
+            group_index = Math.min(group_index, num_groups - 1)
+            groups[group_index].push(year_income[index])            
+        }
+
+        let cm_group_averages = []
+        const reducer = (accumulator, currentValue) => accumulator + parseFloat(currentValue);
+        for (let index = 0; index < num_groups; index++)
+        {
+            let curr_group = groups[index]
+            let count_group = curr_group.length
+            let sum_cm_group = curr_group.map(
+                (x) => x.child_mortality
+            ).reduce(reducer, 0)
+            let sum_income_group = curr_group.map(
+                (x) => x.income
+            ).reduce(reducer, 0)
+            cm_group_averages.push({'cm_avg': sum_cm_group / count_group, 'income_avg': sum_income_group / count_group})
+        }
+
+        const scalex = d3.scaleBand()
+        .domain([...Array(num_groups).keys()])
         .range([0,700])
+        .paddingInner(0.2)
+        .paddingOuter(0.2);
+
         const scaley = d3.scaleLinear()
         .domain([0,y_domain])
-        .range([300,0])
-
+        .range([700,0])
+      
         const scaley_2 = d3.scaleLog()
         .domain([200,179000])
         .range([300,0])
@@ -44,13 +89,14 @@ export class BarChart extends Component {
         d3.select('#scatter').html("");
         d3.select('#scatter').append('g')
         .attr('transform','translate(50,50)')
-        .selectAll('circle')
-        .data(datafiltered)
+        .selectAll('rect')
+        .data(cm_group_averages)
         .enter()
-        .append('circle')
-        .attr('cx',function(d,i) { return scalex(d.year); })
-        .attr('cy',function(d,i) { return scaley(d.median_val); })
-        .attr('r',function(d,i) { return radius; })
+        .append('rect')
+        .attr('x',function(d,i) { return scalex(i); })
+        .attr('y',function(d,i) { return scaley(d.cm_avg); })
+        .attr('width',function(d,i) { return scalex.bandwidth(); })
+        .attr('height',function(d,i) { return (700 - scaley(d.cm_avg)); })
         .attr('fill', function(d,i) {
             if (d.year > 2021) {
                 return 'red';
@@ -67,45 +113,12 @@ export class BarChart extends Component {
             .tickFormat(d3.format("~s"))
         )
         d3.select('svg').append('g')
-        .attr('transform','translate(50,350)')
-        .call(
-            d3.axisBottom(scalex)
-            // .tickValues([300,1000,3000,10000, 30000, 100000])
-            // .tickFormat(d3.format("~s"))
-        )
-
-        d3.select('#scatter').append('g')
-        .attr('transform','translate(50,450)')
-        .selectAll('circle')
-        .data(datafiltered2)
-        .enter()
-        .append('circle')
-        .attr('cx',function(d,i) { return scalex(d.year); })
-        .attr('cy',function(d,i) { return scaley_2(d.median_val); })
-        .attr('r',function(d,i) { return radius; })
-        .attr('fill', function(d,i) {
-            if (d.year > 2021) {
-                return 'red';
-            }
-                return 'lightblue';
-            }
-        )
-    
-        d3.select('#scatter').append('g')
-        .attr('transform','translate(50,450)')
-        .call(
-            d3.axisLeft(scaley_2)
-            .tickValues([300,1000,3000,10000,30000, 100000])
-            .tickFormat(d3.format("~s"))
-        )
-        d3.select('svg').append('g')
         .attr('transform','translate(50,750)')
         .call(
             d3.axisBottom(scalex)
             // .tickValues([300,1000,3000,10000, 30000, 100000])
             // .tickFormat(d3.format("~s"))
-        )
-        
+        )        
 
     }
 
@@ -116,45 +129,6 @@ export class BarChart extends Component {
         // console.log(this.incomedata);
         this.cm_data = await d3.csv(process.env.PUBLIC_URL + '/child_mortality_0_5_year_olds_dying_per_1000_born.csv');
         // console.log(this.cm_data);
-        this.median_childmortality = []
-        this.median_income = []
-
-        for (let index = 1800; index < 2041; index++) {
-            let year_income = this.incomedata.map(
-                (x) => {                 
-                    let cm_country = this.cm_data.find(y => y.country === x.country);
-                    if (cm_country === undefined) {
-                        return null;
-                    }
-                    if (isNaN(x[index]) || isNaN(cm_country[index]))
-                    {
-                        return null;
-                    }
-                    return {'country': x.country, 'income': x[index], 'child_mortality': cm_country[[index]]} 
-                }
-            ).filter(
-                x => {
-                    if (x.child_mortality > 0) return true;
-                    return false;
-                }
-            )
-
-            // console.log(year_income.length)
-            const reducer = (accumulator, currentValue) => accumulator + parseFloat(currentValue);
-            let sum_cm = year_income.map(
-                x => x.child_mortality
-            ).reduce(reducer, 0)
-            // console.log(sum_cm)
-
-            this.median_childmortality.push({'year': index, 'median_val': sum_cm / year_income.length})
-
-            let sum_income = year_income.map(
-                x => x.income
-            ).reduce(reducer, 0)
-            this.median_income.push({'year': index, 'median_val': sum_income / year_income.length})
-        }
-        console.log(this.median_childmortality);
-        console.log(this.median_income);
 
         this.updatechart();
         this.timerID = setInterval(
@@ -181,12 +155,12 @@ export class BarChart extends Component {
         {
             clearInterval(this.timerID);
             this.timerID = null;
-            // this.setState((prevState, prevProps) => {
-            //     return {
-            //         'year': 2021
-            //     };
-            // }
-            // )
+            this.setState((prevState, prevProps) => {
+                return {
+                    'year': 2021
+                };
+            }
+            )
             return;
         }
         this.setState((prevState, prevProps) => {
