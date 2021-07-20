@@ -1,23 +1,23 @@
 {
   "files": {
-    "main.css": "/income-cm-narrative/static/css/main.a8c6a674.chunk.css",
-    "main.js": "/income-cm-narrative/static/js/main.a800c2ea.chunk.js",
-    "main.js.map": "/income-cm-narrative/static/js/main.a800c2ea.chunk.js.map",
-    "runtime-main.js": "/income-cm-narrative/static/js/runtime-main.a3763884.js",
-    "runtime-main.js.map": "/income-cm-narrative/static/js/runtime-main.a3763884.js.map",
-    "static/js/2.a6160f61.chunk.js": "/income-cm-narrative/static/js/2.a6160f61.chunk.js",
-    "static/js/2.a6160f61.chunk.js.map": "/income-cm-narrative/static/js/2.a6160f61.chunk.js.map",
-    "static/js/3.86ca3de2.chunk.js": "/income-cm-narrative/static/js/3.86ca3de2.chunk.js",
-    "static/js/3.86ca3de2.chunk.js.map": "/income-cm-narrative/static/js/3.86ca3de2.chunk.js.map",
+    "main.css": "/income-cm-narrative/static/css/main.a0bd7989.chunk.css",
+    "main.js": "/income-cm-narrative/static/js/main.93345305.chunk.js",
+    "main.js.map": "/income-cm-narrative/static/js/main.93345305.chunk.js.map",
+    "runtime-main.js": "/income-cm-narrative/static/js/runtime-main.fb4fbb9d.js",
+    "runtime-main.js.map": "/income-cm-narrative/static/js/runtime-main.fb4fbb9d.js.map",
+    "static/js/2.4ada012d.chunk.js": "/income-cm-narrative/static/js/2.4ada012d.chunk.js",
+    "static/js/2.4ada012d.chunk.js.map": "/income-cm-narrative/static/js/2.4ada012d.chunk.js.map",
+    "static/js/3.375f98b4.chunk.js": "/income-cm-narrative/static/js/3.375f98b4.chunk.js",
+    "static/js/3.375f98b4.chunk.js.map": "/income-cm-narrative/static/js/3.375f98b4.chunk.js.map",
     "index.html": "/income-cm-narrative/index.html",
-    "static/css/main.a8c6a674.chunk.css.map": "/income-cm-narrative/static/css/main.a8c6a674.chunk.css.map",
-    "static/js/2.a6160f61.chunk.js.LICENSE.txt": "/income-cm-narrative/static/js/2.a6160f61.chunk.js.LICENSE.txt",
+    "static/css/main.a0bd7989.chunk.css.map": "/income-cm-narrative/static/css/main.a0bd7989.chunk.css.map",
+    "static/js/2.4ada012d.chunk.js.LICENSE.txt": "/income-cm-narrative/static/js/2.4ada012d.chunk.js.LICENSE.txt",
     "static/media/logo.6ce24c58.svg": "/income-cm-narrative/static/media/logo.6ce24c58.svg"
   },
   "entrypoints": [
-    "static/js/runtime-main.a3763884.js",
-    "static/js/2.a6160f61.chunk.js",
-    "static/css/main.a8c6a674.chunk.css",
-    "static/js/main.a800c2ea.chunk.js"
+    "static/js/runtime-main.fb4fbb9d.js",
+    "static/js/2.4ada012d.chunk.js",
+    "static/css/main.a0bd7989.chunk.css",
+    "static/js/main.93345305.chunk.js"
   ]
 }
