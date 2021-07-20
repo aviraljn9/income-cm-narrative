@@ -24,11 +24,11 @@ export class Chart extends Component {
 
         let datafiltered = this.median_childmortality.filter(
             x => x.year <= this.state.year
-        )
+        ).sort((x, y) => parseFloat(x.year) - parseFloat(y.year))
 
         let datafiltered2 = this.median_income.filter(
             x => x.year <= this.state.year
-        )
+        ).sort((x, y) => parseFloat(x.year) - parseFloat(y.year))
 
         const scalex = d3.scaleLinear()
         .domain([1800,2040])
@@ -41,23 +41,26 @@ export class Chart extends Component {
         .domain([200,179000])
         .range([300,0])
 
+        var valueline = d3.line()
+        .x(function(d) { return scalex(d.year); })
+        .y(function(d) { return scaley(d.median_val); });    
+
         d3.select('#scatter').html("");
-        d3.select('#scatter').append('g')
-        .attr('transform','translate(50,50)')
-        .selectAll('circle')
-        .data(datafiltered)
-        .enter()
-        .append('circle')
-        .attr('cx',function(d,i) { return scalex(d.year); })
-        .attr('cy',function(d,i) { return scaley(d.median_val); })
-        .attr('r',function(d,i) { return radius; })
-        .attr('fill', function(d,i) {
-            if (d.year > 2021) {
-                return 'red';
-            }
-                return 'lightblue';
-            }
-        )
+
+        d3.select('#ttip').html("");
+
+        var div = d3.select('#ttip').append("div")	
+        .attr("class", "tooltip")				
+        .style("opacity", 0);    
+        
+        this.addpath(datafiltered.filter(x => x.year <= 2021), 'steelblue', scalex, scaley, 'translate(50,50)')
+        this.addpath(datafiltered.filter(x => x.year >= 2021), 'red', scalex, scaley, 'translate(50,50)')
+
+        this.addtooltips(datafiltered, scalex, scaley, div, 'translate(50,50)')
+    
+        // g1.append("path")
+        //     .attr("class", "line")
+        //     .attr("d", valueline(datafiltered));
     
         d3.select('#scatter').append('g')
         .attr('transform','translate(50,50)')
@@ -74,22 +77,10 @@ export class Chart extends Component {
             // .tickFormat(d3.format("~s"))
         )
 
-        d3.select('#scatter').append('g')
-        .attr('transform','translate(50,450)')
-        .selectAll('circle')
-        .data(datafiltered2)
-        .enter()
-        .append('circle')
-        .attr('cx',function(d,i) { return scalex(d.year); })
-        .attr('cy',function(d,i) { return scaley_2(d.median_val); })
-        .attr('r',function(d,i) { return radius; })
-        .attr('fill', function(d,i) {
-            if (d.year > 2021) {
-                return 'red';
-            }
-                return 'lightblue';
-            }
-        )
+        this.addpath(datafiltered2.filter(x => x.year <= 2021), 'steelblue', scalex, scaley_2, 'translate(50,450)')
+        this.addpath(datafiltered2.filter(x => x.year >= 2021), 'red', scalex, scaley_2, 'translate(50,450)')
+
+        this.addtooltips(datafiltered2, scalex, scaley_2, div, 'translate(50,450)')        
     
         d3.select('#scatter').append('g')
         .attr('transform','translate(50,450)')
@@ -107,6 +98,52 @@ export class Chart extends Component {
         )
         
 
+    }
+
+    addpath(data, strk, scalex, scaley, translate)
+    {
+        d3.select('#scatter').append('g')
+        .attr('transform', translate)
+        .append('path')
+        .datum(data)
+        .attr('fill', 'none')
+        .attr('stroke', strk)
+        .attr("stroke-width", 1.5)
+        .attr("d", d3.line()
+            .x(function(d) { return scalex(d.year); })
+            .y(function(d) { return scaley(d.median_val); })
+        )
+    }
+
+    addtooltips(data, scalex, scaley, div, translate)
+    {
+        d3.select('#scatter').append('g')
+        .attr('transform',translate)
+        .selectAll('rect')
+        .data(data)
+        .enter()
+        .append('rect')
+        .attr('x',function(d,i) { return scalex(d.year); })
+        .attr('y',function(d,i) { return 0; })
+        .attr('width',function(d,i) { return 1; })
+        .attr('height', function(d,i) { return 300; })
+        .attr('fill', 'black')
+        .attr('opacity', 0)
+        .on("mouseover", function(event, d) {
+            d3.select(this).attr("opacity", 1)		
+            div.transition()		
+                .duration(200)		
+                .style("opacity", 1);		
+            div.html(d.year + "<br/>" + d.median_val)	
+                .style("left", (event.pageX) + "px")		
+                .style("top", (event.pageY - 28) + "px");	
+            })					
+        .on("mouseout", function(event, d) {		
+            d3.select(this).attr("opacity", 0)		
+            div.transition()		
+                .duration(500)		
+                .style("opacity", 0);	
+            });
     }
 
     async componentDidMount()
@@ -168,6 +205,7 @@ export class Chart extends Component {
         clearInterval(this.timerID);
         this.timerID = null;
         d3.select('#scatter').html("");
+        d3.select('#ttip').html("");
     }    
 
     componentDidUpdate()
@@ -214,9 +252,12 @@ export class Chart extends Component {
                     <output name="selected_year" id="selected_year">{this.state.year}</output>
                 </form>
 
+                <div id='ttip'></div>
+
                 <svg id='scatter' width={800} height={800} ref = {this.svgRef}>
 
                 </svg>
+
             </div>
         )
     }

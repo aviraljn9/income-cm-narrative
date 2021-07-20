@@ -87,6 +87,14 @@ export class BarChart extends Component {
         .range([300,0])
 
         d3.select('#scatter').html("");
+
+        d3.select('#ttip').html("");
+
+        var div = d3.select('#ttip').append("div")	
+        .attr("class", "tooltip")				
+        .style("opacity", 0);    
+
+
         d3.select('#scatter').append('g')
         .attr('transform','translate(50,50)')
         .selectAll('rect')
@@ -104,7 +112,21 @@ export class BarChart extends Component {
                 return 'lightblue';
             }
         )
-    
+        .on("mouseover", function(event, d) {		
+            div.transition()		
+                .duration(200)		
+                .style("opacity", 1);		
+            div.html("Average Income: " + d.income_avg + "<br/>" + d.cm_avg)	
+                .style("left", (event.pageX) + "px")		
+                .style("top", (event.pageY - 28) + "px");	
+            })					
+        .on("mouseout", function(d) {		
+            div.transition()		
+                .duration(500)		
+                .style("opacity", 0);	
+            });
+
+            
         d3.select('#scatter').append('g')
         .attr('transform','translate(50,50)')
         .call(
@@ -142,6 +164,7 @@ export class BarChart extends Component {
         clearInterval(this.timerID);
         this.timerID = null;
         d3.select('#scatter').html("");
+        d3.select('#ttip').html("");
     }    
 
     componentDidUpdate()
@@ -187,6 +210,8 @@ export class BarChart extends Component {
                     <input type="range" min={1800} max={2040} step={1} id="year" value={this.state.year} onInput={this.setyear} />
                     <output name="selected_year" id="selected_year">{this.state.year}</output>
                 </form>
+
+                <div id='ttip'></div>
 
                 <svg id='scatter' width={800} height={800} ref = {this.svgRef}>
 
