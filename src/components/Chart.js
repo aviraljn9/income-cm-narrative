@@ -7,27 +7,40 @@ export class Chart extends Component {
         this.svgRef = React.createRef();
 
         this.state = {
-            'year': 1800
+            'year': 1800,
+            'country': 'average'
         }
+
+        this.cm_plots = {}
+        this.income_plots = {}
+
         this.setyear =this.setyear.bind(this);
         this.tick =this.tick.bind(this);
         this.setCurrentYear =this.setCurrentYear.bind(this);
+        this.handleSelect =this.handleSelect.bind(this);
     }    
 
     updatechart()
     {
         let y_domain = 500;
+
         let radius = 1.5;
         // if (this.state.year == 2021 && this.timerID === null) {
         //     y_domain = 150;
         //     radius = 3;
         // }
+        if (this.state.country != 'average' && this.timerID === null) {
+            y_domain = 1000;
+        }
 
-        let datafiltered = this.median_childmortality.filter(
+
+        var cm_country = this.cm_plots[this.state.country];
+        let datafiltered = cm_country.filter(
             x => x.year <= this.state.year
         ).sort((x, y) => parseFloat(x.year) - parseFloat(y.year))
 
-        let datafiltered2 = this.median_income.filter(
+        var income_country = this.income_plots[this.state.country];
+        let datafiltered2 = income_country.filter(
             x => x.year <= this.state.year
         ).sort((x, y) => parseFloat(x.year) - parseFloat(y.year))
 
@@ -44,7 +57,7 @@ export class Chart extends Component {
 
         var valueline = d3.line()
         .x(function(d) { return scalex(d.year); })
-        .y(function(d) { return scaley(d.median_val); });    
+        .y(function(d) { return scaley(d.val); });    
 
         d3.select('#scatter').html("");
 
@@ -112,7 +125,7 @@ export class Chart extends Component {
         .attr("stroke-width", 1.5)
         .attr("d", d3.line()
             .x(function(d) { return scalex(d.year); })
-            .y(function(d) { return scaley(d.median_val); })
+            .y(function(d) { return scaley(d.val); })
         )
     }
 
@@ -135,7 +148,7 @@ export class Chart extends Component {
             div.transition()		
                 .duration(200)		
                 .style("opacity", 1);		
-            div.html(d.year + "<br/>" + d.median_val)	
+            div.html(d.year + "<br/>" + d.val)	
                 .style("left", (event.pageX) + "px")		
                 .style("top", (event.pageY - 28) + "px");	
             })					
@@ -154,8 +167,12 @@ export class Chart extends Component {
         // console.log(this.incomedata);
         this.cm_data = await d3.csv(process.env.PUBLIC_URL + '/child_mortality_0_5_year_olds_dying_per_1000_born.csv');
         // console.log(this.cm_data);
-        this.median_childmortality = []
-        this.median_income = []
+
+        this.cm_plots = {}
+        this.cm_plots['average'] = []
+        
+        this.income_plots = {}
+        this.income_plots['average'] = []
 
         for (let index = 1800; index < 2041; index++) {
             let year_income = this.incomedata.map(
@@ -177,6 +194,17 @@ export class Chart extends Component {
                 }
             )
 
+            for (let country_index = 0; country_index < year_income.length; country_index++) {
+                const country_data = year_income[country_index];
+                if (!(country_data.country in this.cm_plots))
+                {
+                    this.cm_plots[country_data.country] = [];
+                    this.income_plots[country_data.country] = [];
+                }
+                this.cm_plots[country_data.country].push({'year': index, 'val': country_data.child_mortality});
+                this.income_plots[country_data.country].push({'year': index, 'val': country_data.income});
+            }
+
             // console.log(year_income.length)
             const reducer = (accumulator, currentValue) => accumulator + parseFloat(currentValue);
             let sum_cm = year_income.map(
@@ -184,15 +212,15 @@ export class Chart extends Component {
             ).reduce(reducer, 0)
             // console.log(sum_cm)
 
-            this.median_childmortality.push({'year': index, 'median_val': sum_cm / year_income.length})
+            this.cm_plots['average'].push({'year': index, 'val': sum_cm / year_income.length})
 
             let sum_income = year_income.map(
                 x => x.income
             ).reduce(reducer, 0)
-            this.median_income.push({'year': index, 'median_val': sum_income / year_income.length})
+            this.income_plots['average'].push({'year': index, 'val': sum_income / year_income.length})
         }
-        console.log(this.median_childmortality);
-        console.log(this.median_income);
+        // console.log(this.average_childmortality);
+        // console.log(this.average_income);
 
         this.updatechart();
         this.timerID = setInterval(
@@ -220,16 +248,18 @@ export class Chart extends Component {
         {
             clearInterval(this.timerID);
             this.timerID = null;
-            // this.setState((prevState, prevProps) => {
-            //     return {
-            //         'year': 2021
-            //     };
-            // }
-            // )
+            this.setState((prevState, prevProps) => {
+                return {
+                    'country': prevState.country,
+                    'year': 2040
+                };
+            }
+            )
             return;
         }
         this.setState((prevState, prevProps) => {
             return {
+                'country': prevState.country,
                 'year': prevState.year + 1
             };
         }
@@ -240,7 +270,12 @@ export class Chart extends Component {
     {
         clearInterval(this.timerID);
         this.timerID = null;
-        this.setState({'year': event.target.value});
+        this.setState(
+            {
+                'country': this.state.country,
+                'year': event.target.value
+            }
+        );
 
     }
 
@@ -248,11 +283,28 @@ export class Chart extends Component {
     {
         clearInterval(this.timerID);
         this.timerID = null;
-        this.setState({'year': 2040});
+        this.setState(
+            {
+                'country': this.state.country,
+                'year': 2040
+            }
+        );
+    }
 
+    handleSelect(event)
+    {
+        this.setState(
+            {
+                'country': event.target.value,
+                'year': this.state.year
+            }
+        );
     }
 
     render() {
+        let all_options = Object.keys(this.cm_plots)
+        var all_countries = all_options.filter(x => x != "average").sort()
+        all_options = ["average"].concat(all_countries)
         return (
             <div>
                 <form>
@@ -260,6 +312,20 @@ export class Chart extends Component {
                     <input type="range" min={1800} max={2040} step={1} id="year" value={this.state.year} onInput={this.setyear} />
                     <output name="selected_year" id="selected_year">{this.state.year}</output>
                 </form>
+
+                {
+                    this.timerID === null &&
+                    (
+                        <select value={this.state.country} onChange={this.handleSelect}>
+                            {
+
+                                all_options.map(
+                                    (x) => { return (<option value={x}>{x}</option>); }
+                                )
+                            }
+                        </select>
+                    )
+                }
 
                 <br></br>
                 <div>

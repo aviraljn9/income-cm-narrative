@@ -222,7 +222,7 @@ export class BarChart extends Component {
 
                 <br></br>
                 <div>
-                    <button onClick = {this.setCurrentYear}>Display complete curve</button>
+                    <button onClick = {this.setCurrentYear}>Show 2021 data</button>
                 </div>
 
                 <div id='ttip'></div>
