@@ -11,6 +11,7 @@ export class Chart extends Component {
         }
         this.setyear =this.setyear.bind(this);
         this.tick =this.tick.bind(this);
+        this.setCurrentYear =this.setCurrentYear.bind(this);
     }    
 
     updatechart()
@@ -243,6 +244,14 @@ export class Chart extends Component {
 
     }
 
+    setCurrentYear()
+    {
+        clearInterval(this.timerID);
+        this.timerID = null;
+        this.setState({'year': 2040});
+
+    }
+
     render() {
         return (
             <div>
@@ -251,6 +260,11 @@ export class Chart extends Component {
                     <input type="range" min={1800} max={2040} step={1} id="year" value={this.state.year} onInput={this.setyear} />
                     <output name="selected_year" id="selected_year">{this.state.year}</output>
                 </form>
+
+                <br></br>
+                <div>
+                    <button onClick = {this.setCurrentYear}>Display complete curve</button>
+                </div>
 
                 <div id='ttip'></div>
 
