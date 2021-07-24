@@ -30,5 +30,24 @@ div.tooltip {
 
 div button{
   display:inline-block;
-  
+  margin: 6px;
+  margin-top: 0px;
+  margin-bottom: 2px;
+}
+/* 
+.trendline{
+  shape-rendering: crispEdges;
+
+} */
+
+.text-label{
+  font-size:  14px;
+  paint-order: stroke;
+  fill: brown;
+  /* stroke: #000000; */
+  /* stroke-width: 1px; */
+  /* stroke-linecap: butt; */
+  /* stroke-linejoin: miter; */
+  /* font-weight: 800; */
+
 }

@@ -18,6 +18,7 @@ export class Chart extends Component {
         this.tick =this.tick.bind(this);
         this.setCurrentYear =this.setCurrentYear.bind(this);
         this.handleSelect =this.handleSelect.bind(this);
+        this.addannotation =this.addannotation.bind(this);
     }    
 
     updatechart()
@@ -70,8 +71,10 @@ export class Chart extends Component {
         this.addpath(datafiltered.filter(x => x.year <= 2021), 'steelblue', scalex, scaley, 'translate(50,50)')
         this.addpath(datafiltered.filter(x => x.year >= 2021), 'red', scalex, scaley, 'translate(50,50)')
 
+        this.addannotation(datafiltered, scalex, scaley, 'translate(50,50)', 1)
         this.addtooltips(datafiltered, scalex, scaley, div, 'translate(50,50)')
-    
+
+
         // g1.append("path")
         //     .attr("class", "line")
         //     .attr("d", valueline(datafiltered));
@@ -88,12 +91,13 @@ export class Chart extends Component {
         .call(
             d3.axisBottom(scalex)
             // .tickValues([300,1000,3000,10000, 30000, 100000])
-            // .tickFormat(d3.format("~s"))
+            .tickFormat(d3.format("d"))
         )
 
         this.addpath(datafiltered2.filter(x => x.year <= 2021), 'steelblue', scalex, scaley_2, 'translate(50,450)')
         this.addpath(datafiltered2.filter(x => x.year >= 2021), 'red', scalex, scaley_2, 'translate(50,450)')
 
+        this.addannotation(datafiltered2, scalex, scaley_2, 'translate(50,450)', 2)
         this.addtooltips(datafiltered2, scalex, scaley_2, div, 'translate(50,450)')        
     
         d3.select('#scatter').append('g')
@@ -108,11 +112,96 @@ export class Chart extends Component {
         .call(
             d3.axisBottom(scalex)
             // .tickValues([300,1000,3000,10000, 30000, 100000])
-            // .tickFormat(d3.format("~s"))
+            .tickFormat(d3.format("d"))
         )
         
-
     }
+
+    addannotation(data, scalex, scaley, translate, graphnum)
+    {
+        if (this.timerID === null && this.state.year > 1975)
+        {
+            var year1 = 1925;
+            var year2 = 1975;
+            var x1 = scalex(year1);
+            var x2 = scalex(year2);
+            var datay1 = data.filter(x => parseInt(x.year) == year1);
+            var datay2 = data.filter(x => parseInt(x.year) == year2);
+            if (datay1.length == 0 || datay2.length == 0)
+            {
+                return
+            }
+
+            var val1 = parseFloat(datay1[0].val)
+            var val2 = parseFloat(datay2[0].val)
+
+            var y1 = scaley(val1)
+            var y2 = scaley(val2)
+
+            d3.select('#scatter').append('g')
+            .attr('transform',translate)                
+                .append("rect")
+                .attr("x", x1)
+                .attr("y", Math.min(y1, y2))
+                .attr("width", x2 - x1)
+                .attr("height", Math.abs(y2-y1))
+                .attr("stroke", "black")
+                .attr("fill-opacity", 0.2)
+                .attr("stroke-width", "3")
+                .attr("stroke-dasharray", "4")
+
+            var xt = x1
+            var yt = Math.min(y1, y2) - 60;
+
+            var percentage_increase = ((val2 / val1 - 1) * 100).toFixed(2);
+            var txt1 = ""
+            var txt2 = ""
+            if (graphnum == 1)
+            {
+                percentage_increase = -percentage_increase
+                txt1 = "decrease"
+                txt2 = "child mortality"
+
+                var txtbox = d3.select('#scatter').append('g')
+                .attr('transform',translate)
+                .append('text')
+                .attr("x", xt)
+                .attr("y", yt)
+                .attr("class", "text-label")
+                .text("Percentage " + txt1 + " in " )
+    
+                txtbox.append('tspan')
+                .text(txt2 + " during ")
+                .attr("x", xt)
+                .attr("y", yt + 20)
+                txtbox.append('tspan')
+                .text("1925 - 1975: " + percentage_increase)
+                .attr("x", xt)
+                .attr("y", yt + 40)
+    
+            }
+
+            if (graphnum == 2)
+            {
+                txt1 = "increase"
+                txt2 = "income"
+
+                var txtbox = d3.select('#scatter').append('g')
+                .attr('transform',translate)
+                .append('text')
+                .attr("x", xt)
+                .attr("y", yt + 20)
+                .attr("class", "text-label")
+                .text("...while percentage " + txt1)
+    
+                txtbox.append('tspan')
+                .text("in income: " + percentage_increase)
+                .attr("x", xt)
+                .attr("y", yt + 40)
+    
+            }
+        }
+    }    
 
     addpath(data, strk, scalex, scaley, translate)
     {
@@ -137,6 +226,7 @@ export class Chart extends Component {
         .data(data)
         .enter()
         .append('rect')
+        .attr('class', 'ttrect')
         .attr('x',function(d,i) { return scalex(d.year); })
         .attr('y',function(d,i) { return 0; })
         .attr('width',function(d,i) { return 1; })
@@ -212,12 +302,12 @@ export class Chart extends Component {
             ).reduce(reducer, 0)
             // console.log(sum_cm)
 
-            this.cm_plots['average'].push({'year': index, 'val': sum_cm / year_income.length})
+            this.cm_plots['average'].push({'year': index, 'val': (sum_cm / year_income.length).toFixed(2)})
 
             let sum_income = year_income.map(
                 x => x.income
             ).reduce(reducer, 0)
-            this.income_plots['average'].push({'year': index, 'val': sum_income / year_income.length})
+            this.income_plots['average'].push({'year': index, 'val': (sum_income / year_income.length).toFixed(2)})
         }
         // console.log(this.average_childmortality);
         // console.log(this.average_income);
@@ -316,20 +406,25 @@ export class Chart extends Component {
                 {
                     this.timerID === null &&
                     (
-                        <select value={this.state.country} onChange={this.handleSelect}>
-                            {
+                        <div>
+                            <br></br>
+                            <label> <b>Please select a Country: </b></label>
+                            <select value={this.state.country} onChange={this.handleSelect}>
+                                {
 
-                                all_options.map(
-                                    (x) => { return (<option value={x}>{x}</option>); }
-                                )
-                            }
-                        </select>
+                                    all_options.map(
+                                        (x) => { return (<option value={x}>{x}</option>); }
+                                    )
+                                }
+                            </select>
+                        </div>
                     )
                 }
 
                 <br></br>
                 <div>
                     <button onClick = {this.setCurrentYear}>Display complete curve</button>
+                    <button onClick = {() => this.props.resetFunc(this.props.sceneno)}>Restart this scene</button>
                 </div>
 
                 <div id='ttip'></div>

@@ -12,14 +12,82 @@ export class BarChart extends Component {
         this.setyear =this.setyear.bind(this);
         this.tick =this.tick.bind(this);
         this.setCurrentYear =this.setCurrentYear.bind(this);
+        this.addannotation =this.addannotation.bind(this);
+
+        this.max_year_reached = {}
     }    
+
+    addannotation(x, y, txt1, txt2, txt3, xpoint, ypoint, xarrow, yarrow)
+    {
+        if (this.timerID === null && this.state.year == 2021)
+        {
+            var txtbox = d3.select('#scatter').append('g')
+            .attr('transform','translate(50,50)')
+            .append('text')
+            .attr("x", x)
+            .attr("y", y)
+            .attr("class", "text-label")
+            .text(txt1)
+
+            txtbox.append('tspan')
+            .text(txt2)
+            .attr("x", x)
+            .attr("y", y + 20)
+
+            txtbox.append('tspan')
+            .text(txt3)
+            .attr("x", x)
+            .attr("y", y + 40)
+    
+
+            d3.select('#scatter').append('g')
+            .attr('transform','translate(50,50)')
+            .append("defs")
+            .append("marker")
+            .attr('id','arrow')
+            .attr('viewBox',"0 -5 10 10")
+            .attr('refX',5)
+            .attr('refY',0)
+            .attr('markerWidth',12)
+            .attr('markerHeight',12)
+            .attr('orient','auto')
+            .append("path")
+            .attr("d", "M0,-5L10,0L0,5")
+            .attr("class","arrowHead");
+
+            d3.select('#scatter').append('g')
+            .attr('transform','translate(50,50)')                
+            .append("line")
+            .attr("class", "labelline")
+            .attr("x1", xpoint)
+            .attr("y1", ypoint)
+            .attr("x2", xarrow)
+            .attr("y2", yarrow)
+            .attr("stroke", "black")
+            // .attr("stroke-dasharray", "4")
+            .attr("stroke-width", 1)
+            .attr("marker-end", "url(#arrow)")
+        }
+    }    
+
 
     updatechart()
     {
         let y_domain = 500;
         let radius = 1.5;
+
+        let color = 'lightblue'
+        if (this.state.year > 2021)
+        {
+            color = 'red'
+        }
+        if (this.state.year == 2021)
+        {
+            color = 'orange'
+        }
+
         if (this.state.year == 2021 && this.timerID === null) {
-            y_domain = 70;
+            y_domain = 130;
             radius = 3;
         }
 
@@ -70,11 +138,24 @@ export class BarChart extends Component {
             let sum_income_group = curr_group.map(
                 (x) => x.income
             ).reduce(reducer, 0)
-            cm_group_averages.push({'cm_avg': sum_cm_group / count_group, 'income_avg': sum_income_group / count_group})
+            var cm_avg_this = (sum_cm_group / count_group).toFixed(2);
+            cm_group_averages.push({'cm_avg': cm_avg_this, 'income_avg': (sum_income_group / count_group).toFixed(2)})
+
+            if (cm_avg_this < 100)
+            {
+                if (!(index in this.max_year_reached))
+                {
+                    this.max_year_reached[index] = this.state.year;
+                }
+                else 
+                {
+                    this.max_year_reached[index] = Math.min(this.max_year_reached[index], this.state.year)
+                }
+            }
         }
 
         const scalex = d3.scaleBand()
-        .domain([...Array(num_groups).keys()])
+        .domain([...Array(num_groups).keys()].map(x=>x+1))
         .range([0,700])
         .paddingInner(0.2)
         .paddingOuter(0.2);
@@ -89,6 +170,14 @@ export class BarChart extends Component {
 
         d3.select('#scatter').html("");
 
+        this.addannotation(20, 200, "Average child mortality of", "group 1 countries dropped below 100", "for the first time in 2011", 100, 250, 40, 320)
+
+        this.addannotation(300, 500, "For group 5, average below 100", "was reached in 1982", "", 370, 530, 320, 570)
+
+        this.addannotation(550, 600, "And for group 10, 1949", "", "", 620, 610, 650, 660)
+
+        // this.addannotation(cm_group_averages, scalex, scaley, 1, 20, 200, "Average child mortality of", "group 1 countries dropped below 100", "for the first time in 2011", 0, 0)
+
         d3.select('#ttip').html("");
 
         var div = d3.select('#ttip').append("div")	
@@ -102,17 +191,11 @@ export class BarChart extends Component {
         .data(cm_group_averages)
         .enter()
         .append('rect')
-        .attr('x',function(d,i) { return scalex(i); })
+        .attr('x',function(d,i) { return scalex(i + 1); })
         .attr('y',function(d,i) { return scaley(d.cm_avg); })
         .attr('width',function(d,i) { return scalex.bandwidth(); })
         .attr('height',function(d,i) { return (700 - scaley(d.cm_avg)); })
-        .attr('fill', function(d,i) {
-            if (d.year > 2021) {
-                return 'red';
-            }
-                return 'lightblue';
-            }
-        )
+        .attr('fill', color)
         .on("mouseover", function(event, d) {		
             div.transition()		
                 .duration(200)		
@@ -142,6 +225,7 @@ export class BarChart extends Component {
             // .tickValues([300,1000,3000,10000, 30000, 100000])
             // .tickFormat(d3.format("~s"))
         )        
+
 
     }
 
@@ -177,6 +261,7 @@ export class BarChart extends Component {
     {
         if (this.state.year >= 2040)
         {
+            console.log(this.max_year_reached)
             clearInterval(this.timerID);
             this.timerID = null;
             this.setState((prevState, prevProps) => {
@@ -222,7 +307,8 @@ export class BarChart extends Component {
 
                 <br></br>
                 <div>
-                    <button onClick = {this.setCurrentYear}>Show 2021 data</button>
+                    <button onClick = {this.setCurrentYear}>Show annotated 2021 data</button>
+                    <button onClick = {() => this.props.resetFunc(this.props.sceneno)}>Restart this scene</button>
                 </div>
 
                 <div id='ttip'></div>
