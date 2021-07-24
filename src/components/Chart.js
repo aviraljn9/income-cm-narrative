@@ -252,7 +252,7 @@ export class Chart extends Component {
 
     async componentDidMount()
     {
-        console.log('chart mounted')
+        // console.log('chart mounted')
         this.incomedata = await d3.csv(process.env.PUBLIC_URL + '/income_processed.csv');
         // console.log(this.incomedata);
         this.cm_data = await d3.csv(process.env.PUBLIC_URL + '/child_mortality_0_5_year_olds_dying_per_1000_born.csv');

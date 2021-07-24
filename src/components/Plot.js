@@ -20,8 +20,6 @@ export class Plot extends Component {
 		var xBar = xSeries.reduce(reduceSumFunc) * 1.0 / xSeries.length;
 		var yBar = ySeries.reduce(reduceSumFunc) * 1.0 / ySeries.length;
 
-        console.log(xBar + '.' + yBar)
-
 		var ssXX = xSeries.map(function(d) { return Math.pow(d - xBar, 2); })
 			.reduce(reduceSumFunc);
 		
@@ -30,8 +28,6 @@ export class Plot extends Component {
 			
 		var ssXY = xSeries.map(function(d, i) { return (d - xBar) * (ySeries[i] - yBar); })
 			.reduce(reduceSumFunc);
-
-        console.log(ssXX + ',' + ssYY + ',' + ssXY)
             
 		var slope = ssXY / ssXX;
 		var intercept = yBar - (xBar * slope);
