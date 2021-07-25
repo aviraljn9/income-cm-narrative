@@ -1,8 +1,8 @@
 {
   "files": {
-    "main.css": "/income-cm-narrative/static/css/main.49e7be22.chunk.css",
-    "main.js": "/income-cm-narrative/static/js/main.1ac6f928.chunk.js",
-    "main.js.map": "/income-cm-narrative/static/js/main.1ac6f928.chunk.js.map",
+    "main.css": "/income-cm-narrative/static/css/main.8590fa48.chunk.css",
+    "main.js": "/income-cm-narrative/static/js/main.451757ca.chunk.js",
+    "main.js.map": "/income-cm-narrative/static/js/main.451757ca.chunk.js.map",
     "runtime-main.js": "/income-cm-narrative/static/js/runtime-main.fb4fbb9d.js",
     "runtime-main.js.map": "/income-cm-narrative/static/js/runtime-main.fb4fbb9d.js.map",
     "static/js/2.aaf4c0e8.chunk.js": "/income-cm-narrative/static/js/2.aaf4c0e8.chunk.js",
@@ -10,14 +10,14 @@
     "static/js/3.375f98b4.chunk.js": "/income-cm-narrative/static/js/3.375f98b4.chunk.js",
     "static/js/3.375f98b4.chunk.js.map": "/income-cm-narrative/static/js/3.375f98b4.chunk.js.map",
     "index.html": "/income-cm-narrative/index.html",
-    "static/css/main.49e7be22.chunk.css.map": "/income-cm-narrative/static/css/main.49e7be22.chunk.css.map",
+    "static/css/main.8590fa48.chunk.css.map": "/income-cm-narrative/static/css/main.8590fa48.chunk.css.map",
     "static/js/2.aaf4c0e8.chunk.js.LICENSE.txt": "/income-cm-narrative/static/js/2.aaf4c0e8.chunk.js.LICENSE.txt",
     "static/media/logo.6ce24c58.svg": "/income-cm-narrative/static/media/logo.6ce24c58.svg"
   },
   "entrypoints": [
     "static/js/runtime-main.fb4fbb9d.js",
     "static/js/2.aaf4c0e8.chunk.js",
-    "static/css/main.49e7be22.chunk.css",
-    "static/js/main.1ac6f928.chunk.js"
+    "static/css/main.8590fa48.chunk.css",
+    "static/js/main.451757ca.chunk.js"
   ]
 }
