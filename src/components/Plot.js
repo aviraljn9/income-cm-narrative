@@ -105,7 +105,7 @@ export class Plot extends Component {
             div.transition()		
                 .duration(200)		
                 .style("opacity", 1);		
-            div.html(d.country + "<br/>" + d.income + "<br/>"  + d.child_mortality)	
+            div.html(d.country + "<br/>Income: $" + d.income + "<br/>Child mortality: "  + d.child_mortality)	
                 .style("left", (event.pageX) + "px")		
                 .style("top", (event.pageY - 28) + "px");	
             })					
@@ -122,13 +122,33 @@ export class Plot extends Component {
             // .tickValues([10,100,1000,10000, 100000])
             .tickFormat(d3.format("~s"))
         )
-        d3.select('svg').append('g')
+
+        d3.select('#scatter').append('text')
+        .attr("class", "y label")
+        .attr("text-anchor", "end")
+        .attr("x", -200)
+        .attr("y", 4)
+        .attr("dy", ".75em")
+        .attr("transform", "rotate(-90)")
+        .attr("font-size",14)
+        .text('Child Mortality: 0-5 year-olds dying per 1000 born')
+
+
+        d3.select('#scatter').append('g')
         .attr('transform','translate(50,750)')
         .call(
             d3.axisBottom(scalex)
             .tickValues([300,1000,3000,10000, 30000, 100000])
             .tickFormat(d3.format("~s"))
         )
+
+        d3.select('#scatter').append('text')
+        .attr("class", "x label")
+        .attr("text-anchor", "end")
+        .attr("x", 650)
+        .attr("y", 785)
+        .attr("font-size",12)
+        .text('Income: GDP per capital, adjusted for inflation and PPP (in international dollars, fixed 2011 prices)')
 
         if (this.timerID === null)
         {
@@ -305,7 +325,7 @@ export class Plot extends Component {
                 <form>
                     <label for="year">Please select a year: </label>
                     <input type="range" min={1800} max={2040} step={1} id="year" value={this.state.year} onInput={this.setyear} />
-                    <output name="selected_year" id="selected_year">{this.state.year}</output>
+                    <output name="selected_year" id="selected_year"><b>{this.state.year}</b></output>
                 </form>
 
                 <br></br>

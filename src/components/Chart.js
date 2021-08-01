@@ -72,7 +72,7 @@ export class Chart extends Component {
         this.addpath(datafiltered.filter(x => x.year >= 2021), 'red', scalex, scaley, 'translate(50,50)')
 
         this.addannotation(datafiltered, scalex, scaley, 'translate(50,50)', 1)
-        this.addtooltips(datafiltered, scalex, scaley, div, 'translate(50,50)')
+        this.addtooltips(datafiltered, scalex, scaley, div, 'translate(50,50)', 'Child mortality')
 
 
         // g1.append("path")
@@ -86,6 +86,18 @@ export class Chart extends Component {
             // .tickValues([10,100,1000,10000, 100000])
             .tickFormat(d3.format("~s"))
         )
+
+        d3.select('#scatter').append('text')
+        .attr("class", "y label")
+        .attr("text-anchor", "end")
+        .attr("x", -100)
+        .attr("y", 4)
+        .attr("dy", ".75em")
+        .attr("transform", "rotate(-90)")
+        .attr("font-size",12)
+        .text('Child Mortality (per 1000)')
+
+        
         d3.select('svg').append('g')
         .attr('transform','translate(50,350)')
         .call(
@@ -94,11 +106,20 @@ export class Chart extends Component {
             .tickFormat(d3.format("d"))
         )
 
+        d3.select('#scatter').append('text')
+        .attr("class", "x label")
+        .attr("text-anchor", "end")
+        .attr("x", 450)
+        .attr("y", 385)
+        .attr("font-size",12)
+        .text('Year')
+
+
         this.addpath(datafiltered2.filter(x => x.year <= 2021), 'steelblue', scalex, scaley_2, 'translate(50,450)')
         this.addpath(datafiltered2.filter(x => x.year >= 2021), 'red', scalex, scaley_2, 'translate(50,450)')
 
         this.addannotation(datafiltered2, scalex, scaley_2, 'translate(50,450)', 2)
-        this.addtooltips(datafiltered2, scalex, scaley_2, div, 'translate(50,450)')        
+        this.addtooltips(datafiltered2, scalex, scaley_2, div, 'translate(50,450)', 'Income')        
     
         d3.select('#scatter').append('g')
         .attr('transform','translate(50,450)')
@@ -107,6 +128,17 @@ export class Chart extends Component {
             .tickValues([300,1000,3000,10000,30000, 100000])
             .tickFormat(d3.format("~s"))
         )
+
+        d3.select('#scatter').append('text')
+        .attr("class", "y label")
+        .attr("text-anchor", "end")
+        .attr("x", -530)
+        .attr("y", 4)
+        .attr("dy", ".75em")
+        .attr("transform", "rotate(-90)")
+        .attr("font-size",12)
+        .text('Income per capita ($)')
+
         d3.select('svg').append('g')
         .attr('transform','translate(50,750)')
         .call(
@@ -114,7 +146,26 @@ export class Chart extends Component {
             // .tickValues([300,1000,3000,10000, 30000, 100000])
             .tickFormat(d3.format("d"))
         )
+
+        d3.select('#scatter').append('text')
+        .attr("class", "x label")
+        .attr("text-anchor", "end")
+        .attr("x", 450)
+        .attr("y", 785)
+        .attr("font-size",12)
+        .text('Year')
+
         
+        d3.select('#scatter').append("circle").attr("cx",600).attr("cy",60).attr("r", 4).style("fill", "steelblue")
+        d3.select('#scatter').append("circle").attr("cx",600).attr("cy",80).attr("r", 4).style("fill", "red")
+        d3.select('#scatter').append("text").attr("x", 620).attr("y", 60).text("historical").style("font-size", "12px").attr("alignment-baseline","middle")
+        d3.select('#scatter').append("text").attr("x", 620).attr("y", 80).text("projected").style("font-size", "12px").attr("alignment-baseline","middle")
+
+        d3.select('#scatter').append("circle").attr("cx",600).attr("cy",460).attr("r", 4).style("fill", "steelblue")
+        d3.select('#scatter').append("circle").attr("cx",600).attr("cy",480).attr("r", 4).style("fill", "red")
+        d3.select('#scatter').append("text").attr("x", 620).attr("y", 460).text("historical").style("font-size", "12px").attr("alignment-baseline","middle")
+        d3.select('#scatter').append("text").attr("x", 620).attr("y", 480).text("projected").style("font-size", "12px").attr("alignment-baseline","middle")
+
     }
 
     addannotation(data, scalex, scaley, translate, graphnum)
@@ -218,7 +269,7 @@ export class Chart extends Component {
         )
     }
 
-    addtooltips(data, scalex, scaley, div, translate)
+    addtooltips(data, scalex, scaley, div, translate, datastring)
     {
         d3.select('#scatter').append('g')
         .attr('transform',translate)
@@ -238,7 +289,7 @@ export class Chart extends Component {
             div.transition()		
                 .duration(200)		
                 .style("opacity", 1);		
-            div.html(d.year + "<br/>" + d.val)	
+            div.html(d.year + "<br/>" + datastring + ": " + d.val)	
                 .style("left", (event.pageX) + "px")		
                 .style("top", (event.pageY - 28) + "px");	
             })					
@@ -400,7 +451,7 @@ export class Chart extends Component {
                 <form>
                     <label for="year">Please select a year: </label>
                     <input type="range" min={1800} max={2040} step={1} id="year" value={this.state.year} onInput={this.setyear} />
-                    <output name="selected_year" id="selected_year">{this.state.year}</output>
+                    <output name="selected_year" id="selected_year"><b>{this.state.year}</b></output>
                 </form>
 
                 {

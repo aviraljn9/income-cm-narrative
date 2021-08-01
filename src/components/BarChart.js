@@ -200,7 +200,7 @@ export class BarChart extends Component {
             div.transition()		
                 .duration(200)		
                 .style("opacity", 1);		
-            div.html("Average Income: " + d.income_avg + "<br/>" + d.cm_avg)	
+            div.html("Average Income: $" + d.income_avg + "<br/>Average Child Mortality: " + d.cm_avg)	
                 .style("left", (event.pageX) + "px")		
                 .style("top", (event.pageY - 28) + "px");	
             })					
@@ -218,6 +218,17 @@ export class BarChart extends Component {
             // .tickValues([10,100,1000,10000, 100000])
             .tickFormat(d3.format("~s"))
         )
+
+        d3.select('#scatter').append('text')
+        .attr("class", "y label")
+        .attr("text-anchor", "end")
+        .attr("x", -300)
+        .attr("y", 4)
+        .attr("dy", ".75em")
+        .attr("transform", "rotate(-90)")
+        .attr("font-size",14)
+        .text('Average Child Mortality rate')
+
         d3.select('svg').append('g')
         .attr('transform','translate(50,750)')
         .call(
@@ -225,6 +236,14 @@ export class BarChart extends Component {
             // .tickValues([300,1000,3000,10000, 30000, 100000])
             // .tickFormat(d3.format("~s"))
         )        
+
+        d3.select('#scatter').append('text')
+        .attr("class", "x label")
+        .attr("text-anchor", "end")
+        .attr("x", 550)
+        .attr("y", 785)
+        .attr("font-size",12)
+        .text('Group number (grouped by average income ranks: 1(lowest) to 10(highest))')
 
 
     }
@@ -302,7 +321,7 @@ export class BarChart extends Component {
                 <form>
                     <label for="year">Please select a year: </label>
                     <input type="range" min={1800} max={2040} step={1} id="year" value={this.state.year} onInput={this.setyear} />
-                    <output name="selected_year" id="selected_year">{this.state.year}</output>
+                    <output name="selected_year" id="selected_year"><b>{this.state.year}</b></output>
                 </form>
 
                 <br></br>
